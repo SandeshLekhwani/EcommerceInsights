@@ -54,56 +54,6 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6); /* Darker overlay */
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: #2D3748; /* Dark modal background */
-            color: #E2E8F0; /* Light text */
-            margin: auto;
-            padding: 20px;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.12);
-            max-width: 80%;
-            max-height: 80%;
-            overflow-y: auto;
-            position: relative;
-        }
-        .close-button {
-            color: #CBD5E0; /* Lighter close button */
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .loading-spinner {
-            border: 4px solid #4A5568; /* Darker spinner background */
-            border-top: 4px solid #39A2DB; /* Accent blue */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -121,19 +71,29 @@
                 <div class="card stat-card-large flex flex-col justify-center items-center text-center p-8">
                     <span class="text-7xl font-black text-blue-300">31%</span>
                     <p class="mt-2 text-xl font-semibold">Average Revenue Share</p>
-                    <p class="text-gray-300">Product recommendations account for nearly a third of all e-commerce site revenues on average.</p>
+                    <p class="text-gray-300">Product recommendations account for nearly a third of all e-commerce site revenues on average, demonstrating their critical role in online retail success.</p>
                 </div>
                 <div class="card stat-card-accent flex flex-col justify-center items-center text-center p-8">
                     <span class="text-7xl font-black">35%</span>
                     <p class="mt-2 text-xl font-semibold">The Amazon Benchmark</p>
-                    <p class="text-gray-100">Industry leader Amazon consistently attributes over a third of its massive e-commerce revenue to its recommendation engine.</p>
+                    <p class="text-gray-100">Industry leader Amazon consistently attributes over a third of its massive e-commerce revenue to its recommendation engine, setting a high bar for the industry.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="traffic-revenue-impact" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 section-title">Traffic & Revenue Contribution: Efficiency at Play</h2>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Recommendations drive disproportionately high revenue for their traffic share in both countries, highlighting their exceptional efficiency in converting browsing into purchases. This 'long tail' effect is a key benefit.</p>
+            <div class="card">
+                <div class="chart-container">
+                    <canvas id="trafficRevenueChart"></canvas>
                 </div>
             </div>
         </section>
 
         <section id="kpi-comparison" class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-2 section-title">KPI Lifts: US vs. India</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Personalized recommendations drive significant performance improvements in both markets, with India showing higher percentage lifts due to its nascent stage of e-commerce adoption.</p>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Personalized recommendations drive significant performance improvements in both markets. India, being a rapidly emerging e-commerce landscape, often shows higher percentage lifts due to its nascent stage of adoption and a larger pool of new digital consumers.</p>
             <div class="card">
                 <div class="chart-container">
                     <canvas id="kpiComparisonChart"></canvas>
@@ -143,19 +103,19 @@
 
         <section id="loyalty-discovery-comparison" class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-2 section-title">Loyalty & Discovery: Market Dynamics</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">While US consumers show higher loyalty, Indian consumers are more prone to product discovery through recommendations, reflecting different market maturities.</p>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">While US consumers, in a mature market, demonstrate strong loyalty to sites with effective recommendations, Indian consumers are notably more prone to product discovery through recommendations, reflecting different market maturities and consumer digital journeys.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card">
                     <h3 class="font-bold text-xl mb-4 text-center section-title">United States</h3>
                     <div class="flex flex-col space-y-6 justify-center h-full">
                         <div class="text-center">
                             <p class="text-5xl font-extrabold accent-color">75%</p>
-                            <p class="text-gray-400 font-semibold">More likely to return to a site with good recommendations.</p>
+                            <p class="text-gray-400 font-semibold">More likely to return to a site with good recommendations, indicating the power of personalization in customer retention.</p>
                         </div>
                         <hr class="border-gray-600">
                         <div class="text-center">
                            <p class="text-5xl font-extrabold accent-color">55%</p>
-                            <p class="text-gray-400 font-semibold">Have discovered new products through recommendations.</p>
+                            <p class="text-gray-400 font-semibold">Have discovered new products through recommendations, highlighting their role in expanding consumer horizons.</p>
                         </div>
                     </div>
                 </div>
@@ -164,12 +124,12 @@
                     <div class="flex flex-col space-y-6 justify-center h-full">
                         <div class="text-center">
                             <p class="text-5xl font-extrabold accent-color">60%</p>
-                            <p class="text-gray-400 font-semibold">More likely to return to a site with good recommendations.</p>
+                            <p class="text-gray-400 font-semibold">More likely to return to a site with good recommendations, showing growing trust in digital platforms.</p>
                         </div>
                         <hr class="border-gray-600">
                         <div class="text-center">
                            <p class="text-5xl font-extrabold accent-color">70%</p>
-                            <p class="text-gray-400 font-semibold">Have discovered new products through recommendations.</p>
+                            <p class="text-gray-400 font-semibold">Have discovered new products through recommendations, a crucial factor in a market with diverse product needs and emerging brands.</p>
                         </div>
                     </div>
                 </div>
@@ -178,7 +138,7 @@
 
         <section id="market-share-comparison" class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-2 section-title">E-commerce Market Share</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Dominance varies significantly between the mature US market and the emerging Indian market, influencing recommendation strategies.</p>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Market dominance varies significantly between the mature US market, led by established giants, and the emerging Indian market, which is more fragmented but rapidly consolidating. This influences the competitive landscape for recommendation strategies.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card">
                     <h3 class="font-bold text-xl mb-4 text-center section-title">United States</h3>
@@ -195,19 +155,9 @@
             </div>
         </section>
 
-        <section id="traffic-revenue-impact" class="mb-12">
-            <h2 class="text-3xl font-bold text-center mb-2 section-title">Traffic & Revenue Contribution</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Recommendations drive disproportionately high revenue for their traffic share in both countries, highlighting their efficiency.</p>
-            <div class="card">
-                <div class="chart-container">
-                    <canvas id="trafficRevenueChart"></canvas>
-                </div>
-            </div>
-        </section>
-
         <section id="market-growth-comparison" class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-2 section-title">E-commerce Market Growth Projections</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">India's e-commerce market is projected for explosive growth, while the US market, though larger, shows more moderate expansion.</p>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">India's e-commerce market is projected for explosive growth, driven by increasing internet penetration and smartphone adoption. In contrast, the US market, though significantly larger in absolute terms, shows more moderate expansion typical of a mature economy.</p>
             <div class="card">
                 <div class="chart-container">
                     <canvas id="marketGrowthChart"></canvas>
@@ -217,28 +167,28 @@
 
         <section id="consumer-factors-comparison" class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-2 section-title">Key Consumer & Trust Factors</h2>
-            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Understanding regional consumer behaviors and trust mechanisms is critical for effective personalization.</p>
+            <p class="text-center text-gray-400 max-w-2xl mx-auto mb-8">Understanding regional consumer behaviors and trust mechanisms is critical for effective personalization. In the US, data transparency is paramount, while in India, factors like mobile-first access and Cash on Delivery heavily influence trust and adoption.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card">
                     <h3 class="font-bold text-xl mb-4 text-center section-title">United States Focus</h3>
                     <div class="space-y-4">
                         <div class="flex items-center">
                             <div class="bg-blue-700 text-blue-100 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">1</div>
-                            <p class="font-semibold text-gray-300">Transparent Data Usage</p>
+                            <p class="font-semibold text-gray-300">Transparent Data Usage: Consumers demand clarity on how their data is used for personalization.</p>
                         </div>
                         <div class="pl-5">
                             <div class="h-6 w-px bg-gray-600 ml-5"></div>
                         </div>
                         <div class="flex items-center">
                             <div class="bg-blue-700 text-blue-100 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">2</div>
-                            <p class="font-semibold text-gray-300">Building Consumer Trust</p>
+                            <p class="font-semibold text-gray-300">Building Consumer Trust: Essential for sustained engagement and conversion in a privacy-conscious market.</p>
                         </div>
                         <div class="pl-5">
                              <div class="h-6 w-px bg-gray-600 ml-5"></div>
                         </div>
                         <div class="flex items-center">
                             <div class="bg-green-700 text-green-100 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">✓</div>
-                            <p class="font-bold text-green-300">Effective Personalization</p>
+                            <p class="font-bold text-green-300">Effective Personalization: Achieved when trust is established, leading to higher satisfaction and sales.</p>
                         </div>
                     </div>
                 </div>
@@ -249,7 +199,7 @@
                             <span class="text-4xl mr-4">📱</span>
                             <div>
                                 <p class="text-3xl font-extrabold text-gray-200">75%</p>
-                                <p class="text-gray-400">Of e-commerce volume comes from mobile devices.</p>
+                                <p class="text-gray-400">Of e-commerce volume comes from mobile devices, making mobile optimization for recommendations critical.</p>
                             </div>
                         </div>
                          <hr class="border-gray-600">
@@ -257,40 +207,9 @@
                              <span class="text-4xl mr-4">💵</span>
                             <div>
                                 <p class="text-3xl font-extrabold text-gray-200">>70%</p>
-                                <p class="text-gray-400">Of transactions are Cash on Delivery (COD), a key trust-builder.</p>
+                                <p class="text-gray-400">Of transactions are Cash on Delivery (COD), a key trust-builder for new online shoppers, impacting payment-related recommendations.</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="llm-insights" class="mb-12">
-            <h2 class="text-3xl font-bold text-center mb-8 section-title">✨ AI-Powered Insights & Strategies</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="card flex flex-col items-center justify-center p-6">
-                    <h3 class="font-bold text-xl mb-4 text-center text-gray-200">Market Insights</h3>
-                    <p class="text-center text-gray-400 mb-6">Get a concise summary of key takeaways for each market.</p>
-                    <div class="flex space-x-4">
-                        <button id="generateUsInsightsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 shadow-md">
-                            US Insights
-                        </button>
-                        <button id="generateIndiaInsightsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 shadow-md">
-                            India Insights
-                        </button>
-                    </div>
-                </div>
-                <div class="card flex flex-col items-center justify-center p-6">
-                    <h3 class="font-bold text-xl mb-4 text-center text-gray-200">Tailored Strategy</h3>
-                    <p class="text-center text-gray-400 mb-6">Receive strategic recommendations for optimizing recommendation engines.</p>
-                    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
-                        <select id="marketSelect" class="block w-full md:w-auto p-3 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white">
-                            <option value="us">United States</option>
-                            <option value="india">India</option>
-                        </select>
-                        <button id="generateStrategyBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 shadow-md w-full md:w-auto">
-                            Generate Strategy
-                        </button>
                     </div>
                 </div>
             </div>
@@ -302,16 +221,6 @@
         <p>Data synthesized from "The Performance and Revenue Impact of Product Recommendation Engines Across Global E-commerce" report.</p>
         <p>This infographic is a single-page application built with HTML, Tailwind CSS, and Chart.js. No SVG or Mermaid.js were used.</p>
     </footer>
-
-    <div id="llmModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h3 id="modalTitle" class="text-2xl font-bold mb-4 section-title"></h3>
-            <div id="modalContent" class="text-gray-300">
-                <div class="loading-spinner"></div>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -654,115 +563,6 @@
                         }
                     }
                 }
-            });
-
-            const llmModal = document.getElementById('llmModal');
-            const closeButton = document.querySelector('.close-button');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            const generateUsInsightsBtn = document.getElementById('generateUsInsightsBtn');
-            const generateIndiaInsightsBtn = document.getElementById('generateIndiaInsightsBtn');
-            const generateStrategyBtn = document.getElementById('generateStrategyBtn');
-            const marketSelect = document.getElementById('marketSelect');
-
-            closeButton.onclick = () => {
-                llmModal.style.display = 'none';
-            };
-
-            window.onclick = (event) => {
-                if (event.target == llmModal) {
-                    llmModal.style.display = 'none';
-                }
-            };
-
-            const showModal = (title, contentHtml) => {
-                modalTitle.innerText = title;
-                modalContent.innerHTML = contentHtml;
-                llmModal.style.display = 'flex';
-            };
-
-            const showLoading = () => {
-                showModal('Generating Insights...', '<div class="loading-spinner"></div>');
-            };
-
-            const callGeminiAPI = async (prompt) => {
-                showLoading();
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = { contents: chatHistory };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        const text = result.candidates[0].content.parts[0].text;
-                        return text;
-                    } else {
-                        return "Error: Could not retrieve response from Gemini API.";
-                    }
-                } catch (error) {
-                    console.error("Error calling Gemini API:", error);
-                    return "Error: Failed to connect to Gemini API.";
-                }
-            };
-
-            generateUsInsightsBtn.addEventListener('click', async () => {
-                const prompt = `Based on the following data points for the US e-commerce market:
-                - KPI lifts: Sales +25%, AOV +22.5%, CLV +20%, Engagement +30%
-                - Consumer loyalty: 75% return likelihood, 55% product discovery through recommendations.
-                - Market share: Amazon 37.6%, Walmart 6.4%, eBay 3.5%, Target 2.1%, Others 50.4%.
-                - Traffic from recommendations: 15% contributing to 31% of revenue.
-                - Market growth: from $1.1T (2024) to $1.8T (2033) with a CAGR of ~5.5%.
-                - Importance of transparent data usage and building consumer trust for personalization.
-                Summarize the key insights regarding the performance and impact of recommendation engines in the US market in a concise paragraph.`;
-                const insights = await callGeminiAPI(prompt);
-                showModal('US Market Insights', `<p>${insights}</p>`);
-            });
-
-            generateIndiaInsightsBtn.addEventListener('click', async () => {
-                const prompt = `Based on the following data points for the India e-commerce market:
-                - KPI lifts: Sales +35%, AOV +28%, CLV +25%, Engagement +40%.
-                - Consumer loyalty: 60% return likelihood, 70% product discovery through recommendations.
-                - Market share: Flipkart 32%, Amazon India 31%, Reliance Retail 10%, Myntra 5%, Others 22%.
-                - Traffic from recommendations: 7% contributing to 26% of revenue.
-                - Market growth: from $107.7B (2024) to $549.9B (2033) with a CAGR of 19.70%.
-                - Mobile commerce accounts for 75% of volume.
-                - Cash on Delivery (COD) is used for >70% of transactions as a key trust-builder.
-                Summarize the key insights regarding the performance and impact of recommendation engines in the India market, focusing on growth opportunities and unique consumer behaviors, in a concise paragraph.`;
-                const insights = await callGeminiAPI(prompt);
-                showModal('India Market Insights', `<p>${insights}</p>`);
-            });
-
-            generateStrategyBtn.addEventListener('click', async () => {
-                const market = marketSelect.value;
-                let prompt = "";
-                if (market === "us") {
-                    prompt = `Given the mature US e-commerce market characterized by:
-                    - High competition and established players (Amazon 37.6% market share).
-                    - Consumer privacy awareness and high importance of trust.
-                    - KPI lifts (Sales +25%, AOV +22.5%, CLV +20%, Engagement +30%).
-                    - Significant contribution of recommendations to revenue (31% from 15% traffic).
-                    - Moderate market growth (~5.5% CAGR).
-                    Suggest 3-4 key strategies for optimizing product recommendation engines. Focus on advanced personalization, trust-building, leveraging data for incremental gains, and enhancing customer loyalty.`;
-                } else {
-                    prompt = `Given the rapidly growing Indian e-commerce market characterized by:
-                    - Explosive market growth (19.70% CAGR, from $107.7B to $549.9B).
-                    - Mobile-first adoption (75% of volume).
-                    - Reliance on Cash on Delivery (COD) (>70% transactions) for trust.
-                    - Disproportionate impact of recommendations (7% traffic contributing 26% revenue).
-                    - Higher KPI lifts compared to US (Sales +35%, AOV +28%, CLV +25%, Engagement +40%).
-                    Suggest 3-4 key strategies for optimizing product recommendation engines. Focus on building foundational trust, mobile optimization, guiding new digital consumers, and capitalizing on high growth.`;
-                }
-                const strategy = await callGeminiAPI(prompt);
-                showModal(`${market.toUpperCase()} Recommendation Strategy`, `<p>${strategy}</p>`);
             });
         });
     </script>
