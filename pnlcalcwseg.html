@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>GoKwik P&L Impact Calculator — % with Remainder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    :root{--bg-primary:#0a0a0a;--bg-secondary:rgba(22,22,22,.7);--border-color:rgba(255,255,255,.1);
+      --brand-green:#26cd7b;--brand-blue:#3b82f6;--brand-blue-dark:#2563eb;--brand-green-light:rgba(38,205,123,.1)}
+    body{font-family:'Sora',sans-serif;overflow-x:hidden}
+    .aurora-bg{position:fixed;inset:0;height:100vh;z-index:-1;background:var(--bg-primary);
+      background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:20px 20px}
+    .aurora-bg::before,.aurora-bg::after{content:'';position:absolute;width:800px;height:800px;border-radius:50%;
+      filter:blur(150px);opacity:.15;animation:aurora 15s linear infinite}
+    .aurora-bg::before{top:-20%;left:-20%;background:#4f46e5}
+    .aurora-bg::after{bottom:-20%;right:-20%;background:var(--brand-green);animation-delay:-7s}
+    @keyframes aurora{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(100px,50px) scale(1.1)}}
+    .glass-card{background:var(--bg-secondary);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border-color)}
+    .form-input,.form-select{background:rgba(0,0,0,.3);border:1px solid var(--border-color);width:100%;padding:8px 12px;border-radius:8px;font-size:.875rem;color:#fff;transition:.2s}
+    .form-input:focus,.form-select:focus{outline:none;border-color:var(--brand-blue);box-shadow:0 0 0 2px rgba(59,130,246,.3)}
+    .form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");background-position:right .5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem}
+    .header-input{background:transparent;border:none;color:#fff;font-weight:600;padding:0;width:100%}
+    .header-input:focus{outline:none;box-shadow:0 1px 0 var(--brand-blue)}
+    .winner-col{background:var(--brand-green-light)}
+    .output-cell>div{text-align:right;width:100%}
+    .variant-col:not(.winner-col):hover{background-color:rgba(255,255,255,.03)}
+    .remove-btn{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.1);transition:.2s}
+    .remove-btn:hover{background:rgba(239,68,68,.2);color:#ef4444}
+    .segment-tab{transition:.2s}
+    .segment-tab.active{background:var(--brand-blue);color:#fff}
+    .bg-brand-blue{background:var(--brand-blue)} .hover\:bg-brand-blue-dark:hover{background:var(--brand-blue-dark)}
+  </style>
+</head>
+<body class="bg-[#121212] text-white flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+  <div class="aurora-bg"></div>
+  <div class="w-full max-w-7xl mx-auto z-10">
+    <header class="text-center mb-10">
+      <img src="https://www.gokwik.co/assets/images/logo@2x.png" alt="GoKwik Logo" class="h-10 mx-auto mb-4" onerror="this.style.display='none'">
+      <h1 class="text-3xl sm:text-4xl font-bold">P&L Impact Calculator</h1>
+      <p class="mt-3 text-gray-400 max-w-3xl mx-auto">Compare intervention variants side-by-side to identify the most profitable strategy based on real-world financial metrics.</p>
+    </header>
+
+    <main id="main-content" class="glass-card rounded-2xl p-6">
+      <!-- Baseline -->
+      <section class="p-4">
+        <h2 id="baseline-title" class="text-xl font-semibold border-b border-white/10 pb-4 mb-6">📊 Total & Operational Metrics</h2>
+        <div>
+          <div id="baseline-inputs" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-4">
+            <div><label class="block text-sm text-gray-400">Total Ad Spend (₹)</label><input type="number" id="adSpend" value="50000" class="form-input mt-2"></div>
+            <div><label class="block text-sm text-gray-400">Total Page Hits</label><input type="number" id="totalHits" value="596" class="form-input mt-2"></div>
+            <div><label class="block text-sm text-gray-400">AOV (₹)</label><input type="number" id="aov" value="1000" class="form-input mt-2"></div>
+            <div><label class="block text-sm text-gray-400">Gross Margin (%)</label><input type="number" id="grossMargin" value="30" class="form-input mt-2"></div>
+            <div><label class="block text-sm text-gray-400">Shipping/Delivered Order (₹)</label><input type="number" id="shippingCharge" value="100" class="form-input mt-2"></div>
+            <div><label class="block text-sm text-gray-400">RTO Cost/RTO'd Order (₹)</label><input type="number" id="rtoLossPerOrder" value="150" class="form-input mt-2"></div>
+          </div>
+
+          <div id="segment-baseline-display" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-4 mt-4 p-4 bg-white/5 rounded-lg">
+            <div><span class="block text-sm text-gray-400">Segment Ad Spend (₹)</span><span id="segment-adspend-display" class="text-lg font-semibold mt-2 block"></span></div>
+            <div><span class="block text-sm text-gray-400">Segment Page Hits</span><span id="segment-hits-display" class="text-lg font-semibold mt-2 block"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Segments -->
+      <section class="p-4 mt-4">
+        <h2 class="text-xl font-semibold border-b border-white/10 pb-4 mb-6">🎯 Segment Analysis</h2>
+        <div id="segment-tabs" class="flex items-center gap-2 mb-4 border-b border-white/10 pb-4"></div>
+        <div id="segment-definitions" class="space-y-4"></div>
+        <div class="flex items-center gap-4 mt-4">
+          <button id="add-segment-btn" class="text-sm text-blue-400 font-semibold hover:text-blue-300 transition">+ Add Segment</button>
+          <button id="apply-segments-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg text-sm">Apply Segments</button>
+          <span id="seg-mode-hint" class="text-xs text-gray-400"></span>
+        </div>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="p-4 mt-4">
+        <div class="flex w-full">
+          <div id="metric-labels-col" class="flex-shrink-0 w-56 bg-[#161616]"></div>
+          <div class="flex-grow overflow-x-auto"><div id="variants-inner-container" class="flex"></div></div>
+        </div>
+      </section>
+
+      <!-- Scenario Planner -->
+      <section id="scenario-planner-section" class="p-4 mt-4 hidden">
+        <h2 class="text-xl font-semibold border-b border-white/10 pb-4 mb-6">✨ Scenario Planner & Aggregated Results</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div id="scenario-selectors" class="space-y-4"></div>
+          <div id="aggregated-results" class="bg-white/5 p-6 rounded-lg"></div>
+        </div>
+      </section>
+
+      <footer class="mt-8 pt-6 border-t border-white/10 flex justify-end gap-4">
+        <button id="open-email-modal-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2.5 px-5 rounded-lg text-sm shadow-lg transform hover:-translate-y-0.5">Send Report via Email</button>
+        <button id="download-pdf-btn" class="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-5 rounded-lg text-sm shadow-lg transform hover:-translate-y-0.5">Download as PDF</button>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Email Modal (cosmetic) -->
+  <div id="email-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+    <div class="glass-card rounded-2xl p-8 w-full max-w-md transform scale-95 transition-transform duration-300">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-bold">Send Report</h3>
+        <button id="close-email-modal-btn" class="text-gray-400 hover:text-white">&times;</button>
+      </div>
+      <p class="text-gray-400 text-sm mt-2">Enter an email address to send a snapshot of the current report.</p>
+      <div class="mt-6">
+        <label class="block text-sm text-gray-400">Recipient's Email</label>
+        <input type="email" id="email-input" placeholder="name@example.com" class="form-input mt-2">
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button id="send-email-btn" class="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-5 rounded-lg text-sm shadow-lg">Send Email</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const metricLabelsCol = document.getElementById('metric-labels-col');
+      const variantsInnerContainer = document.getElementById('variants-inner-container');
+      const baselineInputs = document.getElementById('baseline-inputs');
+      const segmentTabsContainer = document.getElementById('segment-tabs');
+      const segmentDefsContainer = document.getElementById('segment-definitions');
+      const addSegmentBtn = document.getElementById('add-segment-btn');
+      const applySegmentsBtn = document.getElementById('apply-segments-btn');
+      const segModeHint = document.getElementById('seg-mode-hint');
+      const scenarioPlannerSection = document.getElementById('scenario-planner-section');
+      const scenarioSelectorsContainer = document.getElementById('scenario-selectors');
+      const aggregatedResultsContainer = document.getElementById('aggregated-results');
+
+      let variantIdCounter = 0;
+      let segmentIdCounter = 0;
+      let activeSegmentId = 'overall';
+      const MAX_EXTRA_VARIANTS = 5;
+
+      const currencyFormatter = new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR', maximumFractionDigits:1 });
+      const numberFormatter = new Intl.NumberFormat('en-IN', { maximumFractionDigits:1 });
+      const shortCurrencyFormatter = (v)=> (Math.abs(v)>=100000? (v/100000).toFixed(1)+'L' : Math.abs(v)>=1000? (v/1000).toFixed(1)+'k' : Math.round(v));
+
+      const metrics = [
+        { id:'intervention', label:'Intervention Type', type:'select' },
+        { id:'cr', label:'Payment Page CR (%)', type:'number' },
+        { id:'cancellationRate', label:'Cancellation Rate (%)', type:'number' },
+        { id:'codSplit', label:'COD Split (%)', type:'number' },
+        { id:'rtoRate', label:'RTO Rate on COD (%)', type:'number' },
+        { id:'codFee', label:'COD Fee per Order (₹)', type:'number' },
+        { id:'prepaidDiscount', label:'Prepaid Discount (%)', type:'number' },
+        { id:'sep_calc', type:'separator', label:'CALCULATION DETAILS' },
+        { id:'initialOrders', label:'Initial Orders', type:'output' },
+        { id:'cancelledOrders', label:'(-) Cancelled Orders', type:'output' },
+        { id:'shippedOrders', label:'(=) Shipped Orders', type:'output' },
+        { id:'rtoOrders', label:'(-) RTO Orders', type:'output' },
+        { id:'deliveredOrders', label:'(=) Delivered Orders', type:'output', highlight:true },
+        { id:'realizedGMV', label:'(=) Realized GMV', type:'output' },
+        { id:'productProfit', label:'(+) Product Profit', type:'output' },
+        { id:'codFeeRevenue', label:'(+) COD Fee Revenue', type:'output' },
+        { id:'prepaidDiscountBurn', label:'(-) Prepaid Discount Burn', type:'output' },
+        { id:'totalShippingCharges', label:'(-) Shipping Charges', type:'output' },
+        { id:'rtoLossOperational', label:'(-) RTO Cost', type:'output' },
+        { id:'sep_output', type:'separator', label:'KEY METRICS' },
+        { id:'grossProfit', label:'Gross Profit (After Variable Costs)', type:'output', highlight:true },
+        { id:'profitUplift', label:'Profit Uplift vs Control', type:'output', highlight:true },
+        { id:'netProfit', label:'Overall Net Profit', type:'output' },
+        { id:'roas', label:'Predicted ROAS', type:'output' },
+        { id:'netRoas', label:'Net ROAS', type:'output' },
+      ];
+
+      const interventionPresets = {
+        custom:{ name:'Custom' },
+        cod_blocking:{ name:'COD Blocking', cr:0.15, cancellationRate:1.0, codSplit:'absolute_zero', rtoRate:0 },
+        partial_cod:{ name:'Partial COD', cr:0.35, cancellationRate:0.9, codSplit:'absolute_zero', rtoRate:0 },
+        cod_fees:{ name:'COD Fees', cr:0.99, cancellationRate:0.99, codSplit:0.85, rtoRate:0.96 },
+        cod_fees_upi_discount:{ name:'COD Fees + UPI Discount', cr:1.0, cancellationRate:0.985, codSplit:0.75, rtoRate:0.94 },
+        upi_discount:{ name:'UPI Discount', cr:1.01, cancellationRate:1.0, codSplit:0.90, rtoRate:0.98 },
+        cod_prompt:{ name:'COD Prompt', cr:1.0, cancellationRate:0.995, codSplit:0.95, rtoRate:0.99 },
+        cod_captcha:{ name:'COD Captcha', cr:0.995, cancellationRate:0.99, codSplit:0.95, rtoRate:0.98 },
+        all_in_one:{ name:'COD Fee + Prompt + UPI', cr:1.005, cancellationRate:0.98, codSplit:0.70, rtoRate:0.92 },
+        prompt_upi:{ name:'Prompt + UPI Discount', cr:1.015, cancellationRate:0.99, codSplit:0.85, rtoRate:0.97 },
+      };
+
+      /* ---------------------------- helpers ---------------------------- */
+      function initializeTable(){
+        const head = document.createElement('div');
+        head.className='h-16 p-2 border-b border-white/10';
+        metricLabelsCol.appendChild(head);
+        metrics.forEach(m=>{
+          const cell=document.createElement('div');
+          const h = m.type==='separator'?'h-8':'h-16';
+          cell.className = `${h} flex items-center p-3 border-b border-white/10 text-sm`;
+          if(m.type==='separator'){ cell.classList.add('text-xs','text-gray-400','font-bold','pt-4'); cell.textContent=m.label; }
+          else { cell.textContent=m.label; if(m.highlight) cell.classList.add('font-bold','text-lg'); }
+          metricLabelsCol.appendChild(cell);
+        });
+      }
+
+      function createAddVariantButtonColumn(){
+        const addCol=document.createElement('div');
+        addCol.id='add-variant-col';
+        addCol.className='flex flex-col border-l border-white/10 w-48 flex-shrink-0';
+        const header=document.createElement('div'); header.className='h-16 border-b border-white/10'; addCol.appendChild(header);
+        const btnCell=document.createElement('div');
+        btnCell.className='h-16 flex items-center justify-center p-3 border-b border-white/10';
+        btnCell.innerHTML=`<button id="add-variant-btn-inner" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg text-sm shadow-lg">+ Add Variant</button>`;
+        addCol.appendChild(btnCell);
+        for(let i=0;i<metrics.length;i++){
+          const empty=document.createElement('div');
+          empty.className=`${metrics[i]?.type==='separator'?'h-8':'h-16'} flex-shrink-0 border-b border-white/10`;
+          addCol.appendChild(empty);
+        }
+        variantsInnerContainer.appendChild(addCol);
+        document.getElementById('add-variant-btn-inner').addEventListener('click',()=>addVariantColumn(false));
+      }
+
+      function addVariantColumn(isControl=false){
+        const cols = document.querySelectorAll('.variant-col').length;
+        if(!isControl && cols-1 >= MAX_EXTRA_VARIANTS){ alert(`You can add a maximum of ${MAX_EXTRA_VARIANTS} variants.`); return; }
+        const id = String(variantIdCounter++);
+        const col=document.createElement('div');
+        col.className='variant-col flex flex-col border-l border-white/10 w-56 flex-shrink-0 transition-colors duration-300';
+        col.dataset.variantId=id;
+
+        const header=document.createElement('div');
+        header.className='h-16 flex items-center justify-between p-3 border-b border-white/10';
+        header.innerHTML = `
+          <input type="text" class="header-input variant-name" placeholder="Variant Name" ${isControl?'readonly':''}>
+          ${!isControl?'<button class="remove-btn remove-variant-btn text-gray-400 ml-2">&times;</button>':''}
+        `;
+        col.appendChild(header);
+
+        metrics.forEach(m=>{
+          const cell=document.createElement('div');
+          cell.className = `${m.type==='separator'?'h-8':'h-16'} flex-shrink-0 flex items-center p-3 border-b border-white/10`;
+          if(m.type==='select'){
+            let options=''; for(const [k,v] of Object.entries(interventionPresets)){ options+=`<option value="${k}">${v.name}</option>`; }
+            cell.innerHTML=`<select class="form-select metric-${m.id} metric-intervention" ${isControl?'disabled':''}></select>`;
+            cell.querySelector('select').innerHTML = options;
+          }else if(m.type==='number'){
+            cell.innerHTML=`<input type="number" step="0.1" class="form-input metric-${m.id}">`;
+          }else if(m.type==='output'){
+            cell.className += ' output-cell';
+            cell.innerHTML = `<div class="metric-${m.id}"></div>`;
+          }
+          col.appendChild(cell);
+        });
+
+        const addBtnCol=document.getElementById('add-variant-col');
+        variantsInnerContainer.insertBefore(col, addBtnCol);
+        setDefaultValues(col,isControl);
+        attachListeners();
+        if(!scenarioPlannerSection.classList.contains('hidden')) populateScenarioPlanner();
+      }
+
+      function setDefaultValues(col,isControl){
+        if(isControl){
+          col.querySelector('.variant-name').value='Control';
+          col.querySelector('.metric-intervention').value='custom';
+          col.querySelector('.metric-cr').value='61.5';
+          col.querySelector('.metric-cancellationRate').value='5';
+          col.querySelector('.metric-codSplit').value='70';
+          col.querySelector('.metric-rtoRate').value='15';
+          col.querySelector('.metric-codFee').value='50';
+          col.querySelector('.metric-prepaidDiscount').value='10';
+        }else{
+          col.querySelector('.variant-name').value=`Variant ${String.fromCharCode(64 + variantIdCounter)}`;
+          col.querySelector('.metric-intervention').value='custom';
+          const control=document.querySelector('.variant-col');
+          col.querySelector('.metric-cr').value=(parseFloat(control.querySelector('.metric-cr').value)+1).toFixed(1);
+          col.querySelector('.metric-cancellationRate').value=(parseFloat(control.querySelector('.metric-cancellationRate').value)-1).toFixed(1);
+          col.querySelector('.metric-codSplit').value=(parseFloat(control.querySelector('.metric-codSplit').value)-5).toFixed(1);
+          col.querySelector('.metric-rtoRate').value=(parseFloat(control.querySelector('.metric-rtoRate').value)-2).toFixed(1);
+          col.querySelector('.metric-codFee').value=control.querySelector('.metric-codFee').value;
+          col.querySelector('.metric-prepaidDiscount').value=control.querySelector('.metric-prepaidDiscount').value;
+        }
+      }
+
+      function applyPreset(select){
+        const key=select.value; if(key==='custom') return;
+        const preset=interventionPresets[key]; const col=select.closest('.variant-col'); const control=document.querySelector('.variant-col');
+        const controlCR=parseFloat(control.querySelector('.metric-cr').value);
+        const controlCancel=parseFloat(control.querySelector('.metric-cancellationRate').value);
+        const controlSplit=parseFloat(control.querySelector('.metric-codSplit').value);
+        const controlRto=parseFloat(control.querySelector('.metric-rtoRate').value);
+
+        col.querySelector('.metric-cr').value=(controlCR*preset.cr).toFixed(1);
+        col.querySelector('.metric-cancellationRate').value=(controlCancel*preset.cancellationRate).toFixed(1);
+        col.querySelector('.metric-codSplit').value=(preset.codSplit==='absolute_zero'?0:(controlSplit*preset.codSplit).toFixed(1));
+        col.querySelector('.metric-rtoRate').value=(controlRto*preset.rtoRate).toFixed(1);
+        col.querySelector('.variant-name').value=preset.name;
+        calculateAll();
+      }
+
+      function getVariantInputs(){
+        return Array.from(document.querySelectorAll('.variant-col')).map(col=>({
+          variantId: col.dataset.variantId,
+          variantName: col.querySelector('.variant-name').value,
+          cr: (parseFloat(col.querySelector('.metric-cr').value)||0)/100,
+          cancellationRate: (parseFloat(col.querySelector('.metric-cancellationRate').value)||0)/100,
+          codSplit: (parseFloat(col.querySelector('.metric-codSplit').value)||0)/100,
+          rtoRate: (parseFloat(col.querySelector('.metric-rtoRate').value)||0)/100,
+          codFee: parseFloat(col.querySelector('.metric-codFee').value)||0,
+          prepaidDiscount: (parseFloat(col.querySelector('.metric-prepaidDiscount').value)||0)/100,
+        }));
+      }
+
+      /** Compute segment multipliers from user-entered percentages, with an automatic “Overall (Remaining)”.
+       * - If sums <= 100 → use as-is, remainder = 100 - sum.
+       * - If sums > 100 → scale all down proportionally so total = 100, remainder = 0.
+       */
+      function getSegmentSplits(){
+        const defs = Array.from(document.querySelectorAll('.segment-def'));
+        const splits = {};
+        let sumHits = 0, sumSpend = 0;
+
+        defs.forEach(def=>{
+          const id = def.dataset.segmentId;
+          const name = def.querySelector('.segment-name').value || `Segment ${id}`;
+          let h = Math.max(0, parseFloat(def.querySelector('.segment-hits').value) || 0);
+          let s = Math.max(0, parseFloat(def.querySelector('.segment-adspend').value) || 0);
+          sumHits += h; sumSpend += s;
+          splits[id] = { id, name, h, s };
+        });
+
+        // scale down if over 100
+        const scaleH = sumHits > 100 ? 100 / sumHits : 1;
+        const scaleS = sumSpend > 100 ? 100 / sumSpend : 1;
+
+        let usedHits = 0, usedSpend = 0;
+        Object.values(splits).forEach(seg=>{
+          seg.hitsMult  = (seg.h * scaleH) / 100;
+          seg.spendMult = (seg.s * scaleS) / 100;
+          usedHits  += seg.h * scaleH;
+          usedSpend += seg.s * scaleS;
+        });
+
+        const remainder = {
+          hitsMult:  Math.max(0, (100 - usedHits)  / 100),
+          spendMult: Math.max(0, (100 - usedSpend) / 100),
+        };
+
+        // UX hint
+        if(defs.length===0){ segModeHint.textContent=''; }
+        else{
+          const hTxt = (usedHits).toFixed(1);
+          const sTxt = (usedSpend).toFixed(1);
+          const remTxt = `remaining: hits ${Math.max(0,(100-usedHits)).toFixed(1)}%, spend ${Math.max(0,(100-usedSpend)).toFixed(1)}%`;
+          segModeHint.textContent = `Mode: percentages (hits=${hTxt}%, spend=${sTxt}%, ${remTxt})`;
+        }
+
+        return { splits, remainder };
+      }
+
+      /* ---------------------------- core calc ---------------------------- */
+      function calculateAll(){
+        const totalAdSpend=parseFloat(document.getElementById('adSpend').value)||0;
+        const totalHits=parseFloat(document.getElementById('totalHits').value)||0;
+
+        const hasSegments = document.querySelectorAll('.segment-def').length > 0;
+        const { splits, remainder } = getSegmentSplits();
+
+        let hitsMult = 1, spendMult = 1;
+        const segDisplay=document.getElementById('segment-baseline-display');
+
+        if(hasSegments){
+          if(activeSegmentId==='overall'){ hitsMult=remainder.hitsMult; spendMult=remainder.spendMult; }
+          else if(splits[activeSegmentId]){ hitsMult=splits[activeSegmentId].hitsMult; spendMult=splits[activeSegmentId].spendMult; }
+          segDisplay.classList.remove('hidden');
+          document.getElementById('segment-adspend-display').textContent = currencyFormatter.format(totalAdSpend * spendMult);
+          document.getElementById('segment-hits-display').textContent = numberFormatter.format(totalHits * hitsMult);
+        } else {
+          segDisplay.classList.add('hidden');
+        }
+
+        const adSpend=totalAdSpend*spendMult;
+        const hitsAdj=totalHits*hitsMult;
+
+        const variants=getVariantInputs();
+        const results=[]; let controlProfit=0;
+
+        variants.forEach((v,idx)=>{
+          const calc=runCalculation(hitsAdj, adSpend, v);
+          if(idx===0) controlProfit=calc.grossProfitAfterVariableCosts;
+          const profitUplift=calc.grossProfitAfterVariableCosts - controlProfit;
+          results.push({ col:document.querySelector(`.variant-col[data-variant-id="${v.variantId}"]`), ...v, ...calc, profitUplift });
+        });
+
+        displayResults(results);
+        calculateAggregateResults();
+      }
+
+      function displayResults(results){
+        const winner = results.slice(1).reduce((p,c)=> p.profitUplift>c.profitUplift?p:c, {profitUplift:-Infinity});
+        results.forEach((r,idx)=>{
+          r.col.classList.remove('winner-col');
+          if(idx!==0 && r.col.dataset.variantId===winner.col?.dataset?.variantId && winner.profitUplift>0){ r.col.classList.add('winner-col'); }
+
+          const setOut=(id,val,sub='')=>{
+            const el=r.col.querySelector(`.metric-${id}`); if(!el) return;
+            el.innerHTML=`<span class="font-semibold text-base">${val}</span>${sub?`<span class="text-xs text-gray-500 block mt-1">${sub}</span>`:''}`;
+          };
+
+          const currencyFormatter = new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR', maximumFractionDigits:1 });
+          const numberFormatter = new Intl.NumberFormat('en-IN', { maximumFractionDigits:1 });
+          const shortCurrencyFormatter = (v)=> (Math.abs(v)>=100000? (v/100000).toFixed(1)+'L' : Math.abs(v)>=1000? (v/1000).toFixed(1)+'k' : Math.round(v));
+
+          setOut('initialOrders', numberFormatter.format(r.initialOrders));
+          setOut('cancelledOrders', numberFormatter.format(r.cancelledOrders));
+          setOut('shippedOrders', numberFormatter.format(r.shippedOrders));
+          setOut('rtoOrders', numberFormatter.format(r.rtoOrders));
+          setOut('deliveredOrders', numberFormatter.format(r.deliveredOrders));
+          setOut('realizedGMV', currencyFormatter.format(r.realizedGMV));
+          setOut('productProfit', currencyFormatter.format(r.productProfit));
+          setOut('codFeeRevenue', currencyFormatter.format(r.codFeeRevenue));
+          setOut('prepaidDiscountBurn', currencyFormatter.format(r.prepaidDiscountBurn));
+          setOut('totalShippingCharges', currencyFormatter.format(r.totalShippingCharges));
+          setOut('rtoLossOperational', currencyFormatter.format(r.rtoLossOperational));
+          setOut('grossProfit', currencyFormatter.format(r.grossProfitAfterVariableCosts), '(Profit - Var. Costs)');
+          setOut('netProfit', currencyFormatter.format(r.netProfit), `(${shortCurrencyFormatter(r.grossProfitAfterVariableCosts)} - ${shortCurrencyFormatter(r.adSpend)})`);
+          setOut('roas', typeof r.roas==='string'? r.roas : r.roas.toFixed(1)+'x', r.roas!=='NA'?'(Gross Rev / Ad Spend)':'');
+          setOut('netRoas', typeof r.netRoas==='string'? r.netRoas : r.netRoas.toFixed(1)+'x', r.netRoas!=='NA'?'(Net Profit / Ad Spend)':'');
+
+          const upliftEl=r.col.querySelector('.metric-profitUplift');
+          if(upliftEl){
+            if(idx>0){
+              const pos=r.profitUplift>=0;
+              upliftEl.innerHTML=`<span class="font-bold text-lg ${pos?'text-green-400':'text-red-400'}">${pos?'+':''}${currencyFormatter.format(r.profitUplift)}</span><span class="text-xs text-gray-500 block mt-1">(vs. Control)</span>`;
+            } else upliftEl.innerHTML='<span class="font-semibold text-lg">-</span>';
+          }
+
+          ['productProfit','codFeeRevenue'].forEach(id=> r.col.querySelector(`.metric-${id} span:first-child`)?.classList.add('text-green-400'));
+          ['cancelledOrders','rtoOrders','prepaidDiscountBurn','totalShippingCharges','rtoLossOperational'].forEach(id=> r.col.querySelector(`.metric-${id} span:first-child`)?.classList.add('text-red-400'));
+        });
+      }
+
+      function attachListeners(){
+        document.querySelectorAll('.form-input, .header-input').forEach(el=>{ el.oninput = calculateAll; });
+        document.querySelectorAll('.metric-intervention').forEach(el=>{ el.onchange = (e)=> applyPreset(e.target); });
+        document.querySelectorAll('.remove-variant-btn').forEach(btn=>{ btn.onclick = handleRemoveVariant; });
+        document.querySelectorAll('.remove-segment-btn').forEach(btn=>{ btn.onclick = handleRemoveSegment; });
+      }
+
+      function handleRemoveVariant(e){
+        e.target.closest('.variant-col').remove();
+        calculateAll();
+        if(!scenarioPlannerSection.classList.contains('hidden')) populateScenarioPlanner();
+      }
+
+      function handleRemoveSegment(e){
+        e.target.closest('.segment-def').remove();
+        populateScenarioPlanner();
+        calculateAll();
+      }
+
+      // Segments
+      function addSegment(){
+        const id=`segment_${segmentIdCounter++}`;
+        const wrap=document.createElement('div');
+        wrap.className='segment-def grid grid-cols-12 gap-4 items-center';
+        wrap.dataset.segmentId=id;
+        wrap.innerHTML = `
+          <div class="col-span-5"><input type="text" placeholder="Segment Name (e.g., High risk)" class="form-input segment-name"></div>
+          <div class="col-span-3"><input type="number" placeholder="Hits %" class="form-input segment-hits"></div>
+          <div class="col-span-3"><input type="number" placeholder="Ad Spend %" class="form-input segment-adspend"></div>
+          <div class="col-span-1 flex justify-end"><button class="remove-btn remove-segment-btn text-gray-400">&times;</button></div>
+        `;
+        segmentDefsContainer.appendChild(wrap);
+        attachListeners();
+      }
+
+      function addSegmentTab(id, name, isOverall=false){
+        const btn=document.createElement('button');
+        btn.className='segment-tab text-sm font-semibold px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300';
+        btn.dataset.segmentId=id;
+        btn.textContent=isOverall? 'Overall (Remaining)' : name;
+        btn.addEventListener('click',()=> setActiveSegment(id));
+        segmentTabsContainer.appendChild(btn);
+      }
+
+      function applySegments(){
+        // Rebuild tabs
+        segmentTabsContainer.innerHTML='';
+        const defs = document.querySelectorAll('.segment-def');
+        addSegmentTab('overall','Overall', defs.length>0); // show "(Remaining)" when segments exist
+        defs.forEach(d=>{
+          const id=d.dataset.segmentId; const name=d.querySelector('.segment-name').value || `Segment ${id}`;
+          addSegmentTab(id, name);
+        });
+        setActiveSegment('overall');
+        populateScenarioPlanner();
+        calculateAll();
+      }
+
+      function setActiveSegment(id){
+        activeSegmentId=id;
+        document.querySelectorAll('.segment-tab').forEach(t=> t.classList.toggle('active', t.dataset.segmentId===id));
+        const title=document.getElementById('baseline-title');
+        if(id==='overall'){
+          const defs = document.querySelectorAll('.segment-def');
+          title.textContent = defs.length ? '📊 Metrics for "Overall (Remaining)"' : '📊 Total & Operational Metrics';
+        } else {
+          const name=document.querySelector(`.segment-def[data-segment-id="${id}"] .segment-name`)?.value || 'Segment';
+          title.textContent = `🎯 Metrics for "${name}" Segment`;
+        }
+        calculateAll();
+      }
+
+      // Scenario planner
+      function populateScenarioPlanner(){
+        scenarioPlannerSection.classList.remove('hidden');
+        scenarioSelectorsContainer.innerHTML='';
+        const defs=document.querySelectorAll('.segment-def');
+        const variants=getVariantInputs();
+        const opts=variants.map(v=>`<option value="${v.variantId}">${v.variantName}</option>`).join('');
+
+        // Overall represents remainder
+        scenarioSelectorsContainer.innerHTML += `
+          <div class="grid grid-cols-2 gap-4 items-center">
+            <label class="text-sm font-semibold">Overall (Remaining)</label>
+            <select data-segment-id="overall" class="form-select scenario-selector">${opts}</select>
+          </div>
+        `;
+        defs.forEach(d=>{
+          const id=d.dataset.segmentId; const name=d.querySelector('.segment-name').value || `Segment ${id}`;
+          scenarioSelectorsContainer.innerHTML += `
+            <div class="grid grid-cols-2 gap-4 items-center">
+              <label class="text-sm font-semibold">${name}</label>
+              <select data-segment-id="${id}" class="form-select scenario-selector">${opts}</select>
+            </div>
+          `;
+        });
+        document.querySelectorAll('.scenario-selector').forEach(sel=> sel.addEventListener('change', calculateAggregateResults));
+        calculateAggregateResults();
+      }
+
+      function calculateAggregateResults(){
+        const totalAdSpend=parseFloat(document.getElementById('adSpend').value)||0;
+        const totalHits=parseFloat(document.getElementById('totalHits').value)||0;
+
+        const variants=getVariantInputs();
+        if(!variants.length) return;
+
+        const defs=document.querySelectorAll('.segment-def');
+        const hasSegments=defs.length>0;
+        const { splits, remainder } = getSegmentSplits();
+
+        let totalNet=0, totalGross=0, totalGrossRevForRoas=0;
+
+        if(!hasSegments){
+          const sel=document.querySelector('.scenario-selector[data-segment-id="overall"]');
+          const id = sel?.value ?? variants[0].variantId;
+          const v = variants.find(x=> String(x.variantId)===String(id));
+          if(v){
+            const { grossProfitAfterVariableCosts, netProfit, grossRevenueForRoas } = runCalculation(totalHits, totalAdSpend, v);
+            totalNet = netProfit; totalGross = grossProfitAfterVariableCosts; totalGrossRevForRoas = grossRevenueForRoas;
+          }
+        }else{
+          // remainder first
+          const overallSel=document.querySelector('.scenario-selector[data-segment-id="overall"]');
+          const overallVar = variants.find(x=> String(x.variantId)===String(overallSel?.value)) || variants[0];
+          if(overallVar){
+            const { grossProfitAfterVariableCosts, netProfit, grossRevenueForRoas } =
+              runCalculation(totalHits*remainder.hitsMult, totalAdSpend*remainder.spendMult, overallVar);
+            totalGross += grossProfitAfterVariableCosts; totalNet += netProfit; totalGrossRevForRoas += grossRevenueForRoas;
+          }
+          // each explicit segment
+          defs.forEach(d=>{
+            const segId=d.dataset.segmentId;
+            const sel=document.querySelector(`.scenario-selector[data-segment-id="${segId}"]`);
+            const v = variants.find(x=> String(x.variantId)===String(sel?.value));
+            if(!v) return;
+            const mult = splits[segId] || {hitsMult:0, spendMult:0};
+            const { grossProfitAfterVariableCosts, netProfit, grossRevenueForRoas } =
+              runCalculation(totalHits*mult.hitsMult, totalAdSpend*mult.spendMult, v);
+            totalGross += grossProfitAfterVariableCosts; totalNet += netProfit; totalGrossRevForRoas += grossRevenueForRoas;
+          });
+        }
+
+        const roas = totalAdSpend>0 ? (totalGrossRevForRoas/totalAdSpend) : 'NA';
+        const netRoas = totalAdSpend>0 ? (totalNet/totalAdSpend) : 'NA';
+
+        aggregatedResultsContainer.innerHTML = `
+          <h3 class="text-lg font-bold mb-4">Aggregated Results</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between"><span class="text-gray-400">Total Gross Profit</span><span class="font-semibold">${currencyFormatter.format(totalGross)}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Total Net Profit</span><span class="font-bold text-lg ${totalNet>=0?'text-green-400':'text-red-400'}">${currencyFormatter.format(totalNet)}</span></div>
+            <hr class="border-white/10 my-2">
+            <div class="flex justify-between"><span class="text-gray-400">Blended Predicted ROAS</span><span class="font-semibold">${typeof roas==='string'? roas : roas.toFixed(1)+'x'}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Blended Net ROAS</span><span class="font-semibold">${typeof netRoas==='string'? netRoas : netRoas.toFixed(1)+'x'}</span></div>
+          </div>
+        `;
+      }
+
+      function runCalculation(hits, adSpend, v){
+        const aov=parseFloat(document.getElementById('aov').value)||0;
+        const gm=(parseFloat(document.getElementById('grossMargin').value)||0)/100;
+        const ship=parseFloat(document.getElementById('shippingCharge').value)||0;
+        const rtoLoss=parseFloat(document.getElementById('rtoLossPerOrder').value)||0;
+
+        const initialOrders = hits * v.cr;
+        const cancelled = initialOrders * v.cancellationRate;
+        const shipped = initialOrders - cancelled;
+        const codOrders = shipped * v.codSplit;
+        const prepaidOrders = shipped * (1 - v.codSplit);
+        const rto = codOrders * v.rtoRate;
+        const delivered = shipped - rto;
+
+        const gmv = delivered * aov;
+        const productProfit = gmv * gm;
+        const deliveredCOD = codOrders - rto;
+        const codFeeRevenue = deliveredCOD * v.codFee;
+        const prepaidDiscountBurn = prepaidOrders * aov * v.prepaidDiscount;
+        const shippingTotal = delivered * ship;
+        const rtoOperational = rto * rtoLoss;
+
+        const grossProfitAfterVariableCosts = productProfit + codFeeRevenue - (prepaidDiscountBurn + shippingTotal + rtoOperational);
+        const netProfit = grossProfitAfterVariableCosts - adSpend;
+
+        const grossRevenueForRoas = gmv*gm + codFeeRevenue - prepaidDiscountBurn;
+        const roas = adSpend>0 ? (grossRevenueForRoas/adSpend) : 'NA';
+        const netRoas = adSpend>0 ? (netProfit/adSpend) : 'NA';
+
+        return {
+          initialOrders, cancelledOrders:cancelled, shippedOrders:shipped, rtoOrders:rto, deliveredOrders:delivered,
+          realizedGMV:gmv, productProfit, codFeeRevenue, prepaidDiscountBurn, totalShippingCharges:shippingTotal,
+          rtoLossOperational:rtoOperational, grossProfitAfterVariableCosts, netProfit, grossRevenueForRoas, roas, netRoas, adSpend
+        };
+      }
+
+      // ---------- boot ----------
+      initializeTable();
+      addSegmentTab('overall','Overall',false);
+      setActiveSegment('overall');
+
+      // variants
+      addVariantColumn(true);   // Control
+      createAddVariantButtonColumn();
+      addVariantColumn(false);  // Variant B
+
+      // segment UI
+      addSegmentBtn.addEventListener('click', ()=>{
+        addSegment();
+        if(document.querySelectorAll('.segment-def').length===1){ applySegments(); }
+      });
+      applySegmentsBtn.addEventListener('click', applySegments);
+
+      baselineInputs.addEventListener('input', calculateAll);
+      calculateAll();
+
+      // cosmetic modal/pdf
+      const emailModal=document.getElementById('email-modal');
+      document.getElementById('open-email-modal-btn').onclick=()=>{ emailModal.style.opacity='1'; emailModal.style.pointerEvents='auto'; emailModal.querySelector('.transform').style.transform='scale(1)'; };
+      document.getElementById('close-email-modal-btn').onclick=()=>{ emailModal.style.opacity='0'; emailModal.style.pointerEvents='none'; emailModal.querySelector('.transform').style.transform='scale(0.95)'; };
+      document.getElementById('download-pdf-btn').onclick=()=>{
+        const el=document.getElementById('main-content');
+        html2pdf().from(el).set({ margin:0.5, filename:'gokwik_pl_calculator.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} }).save();
+      };
+    });
+  </script>
+</body>
+</html>
